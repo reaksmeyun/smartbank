@@ -14,10 +14,6 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
-      name: "SmartBank",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SmartBank__factory>;
-    getContractFactory(
       name: "Counter",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Counter__factory>;
@@ -25,12 +21,11 @@ declare module "hardhat/types/runtime" {
       name: "MyToken",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.MyToken__factory>;
-
-    getContractAt(
+    getContractFactory(
       name: "SmartBank",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.SmartBank>;
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SmartBank__factory>;
+
     getContractAt(
       name: "Counter",
       address: string | ethers.Addressable,
@@ -41,11 +36,12 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.MyToken>;
-
-    deployContract(
+    getContractAt(
       name: "SmartBank",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
     ): Promise<Contracts.SmartBank>;
+
     deployContract(
       name: "Counter",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -54,12 +50,11 @@ declare module "hardhat/types/runtime" {
       name: "MyToken",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.MyToken>;
-
     deployContract(
       name: "SmartBank",
-      args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SmartBank>;
+
     deployContract(
       name: "Counter",
       args: any[],
@@ -70,6 +65,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.MyToken>;
+    deployContract(
+      name: "SmartBank",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SmartBank>;
 
     // default types
     getContractFactory(
