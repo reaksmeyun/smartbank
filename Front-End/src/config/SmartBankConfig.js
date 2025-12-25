@@ -7,253 +7,6 @@ export const SmartBankABI = [
     "type": "constructor"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "lifetimeInterest",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "INTEREST_RATE_BP",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "PERFORMANCE_FEE_BP",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "SECONDS_IN_YEAR",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "BASE_RATE_FACTOR",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalTreasuryFees",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "lastInterestCalculationTime",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "initialize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "stateMutability": "payable",
-    "type": "receive",
-    "value": 0
-  },
-  {
-    "inputs": [],
-    "name": "deposit",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function",
-    "payable": true
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "withdraw",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "getBalance",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "getHistory",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "string",
-            "name": "txType",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "amount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct SmartBank.Transaction[]",
-        "name": "",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalUserDeposits",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "fundBank",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getBankStatistics",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "totalLiquidity",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "bankProfit",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "userLiabilities",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "withdrawFees",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
@@ -288,7 +41,7 @@ export const SmartBankABI = [
         "type": "uint256"
       }
     ],
-    "name": "Withdrawn",
+    "name": "InterestApplied",
     "type": "event"
   },
   {
@@ -305,37 +58,186 @@ export const SmartBankABI = [
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
       }
     ],
-    "name": "InterestPaid",
+    "name": "Withdrawn",
     "type": "event"
   },
   {
-    "anonymous": false,
+    "inputs": [],
+    "name": "BASE_RATE_FACTOR",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "INTEREST_RATE_BP",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SECONDS_IN_YEAR",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "WETH",
+    "outputs": [
+      {
+        "internalType": "contract IWETH",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "aavePool",
+    "outputs": [
+      {
+        "internalType": "contract IPool",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "deposit",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
-        "indexed": false,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getBankProfit",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "lastInterestCalculationTime",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
       }
     ],
-    "name": "BankFunded",
-    "type": "event"
+    "name": "withdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawBankProfit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ];
 
 // Contract addresses - Updated after successful deployment
 export const CONTRACT_ADDRESSES = {
-  localhost: '0x5FbDB2315678afecb367f032d93F642f64180aa3', // Updated to current proxy address
-  // sepolia: '0x0000000000000000000000000000000000000000', // Replace with actual address
-  mainnet: '0x0000000000000000000000000000000000000000'   // When ready for mainnet
+  localhost: '0x4d8B3EDE20D9cE6e5655C8ba542be005570f4014',
+  mainnet: '0x0000000000000000000000000000000000000000'
 };
 
 // Network configurations
@@ -346,25 +248,12 @@ export const NETWORK_CONFIGS = {
     rpcUrl: 'http://127.0.0.1:8545',
     explorer: null
   }
-  // sepolia: {
-  //   chainId: 11155111,
-  //   name: 'Sepolia',
-  //   rpcUrl: 'https://rpc.sepolia.org',
-  //   explorer: 'https://sepolia.etherscan.io'
-  // },
-  // mainnet: {
-  //   chainId: 1,
-  //   name: 'Ethereum',
-  //   rpcUrl: 'https://mainnet.infura.io/v3/YOUR_PROJECT_ID',
-  //   explorer: 'https://etherscan.io'
-  // }
 };
 
 // Contract constants
 export const CONTRACT_CONSTANTS = {
   MIN_DEPOSIT_AMOUNT: ethers.parseEther('0.001'), // 0.001 ETH
   INTEREST_RATE_BP: 500, // 5%
-  PERFORMANCE_FEE_BP: 1000, // 10%
   SECONDS_IN_YEAR: 31536000,
   BASE_RATE_FACTOR: 10000
 };
@@ -373,7 +262,7 @@ export const CONTRACT_CONSTANTS = {
 export const TX_TYPES = {
   DEPOSIT: 'Deposited',
   WITHDRAW: 'Withdrawn',
-  INTEREST: 'InterestPaid'
+  INTEREST: 'InterestApplied'
 };
 
 // Utility functions for contract interactions
@@ -428,6 +317,15 @@ export const SmartBankUtils = {
    */
   formatTimestamp: (timestamp) => {
     return new Date(timestamp * 1000).toLocaleDateString();
+  },
+
+  /**
+   * Format address for display (e.g. 0x1234...5678)
+   */
+  formatAddress: (address, length = 4) => {
+    if (!address) return '';
+    if (address.length <= (length * 2) + 2) return address;
+    return `${address.substring(0, length + 2)}...${address.substring(address.length - length)}`;
   },
 
   /**

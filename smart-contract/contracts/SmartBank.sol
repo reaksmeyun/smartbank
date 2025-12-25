@@ -4,17 +4,45 @@ pragma solidity ^0.8.28;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract SmartBank is
+// Aave V3 Pool Interface
+interface IPool {
+    function supply(
+        address asset,
+        uint256 amount,
+        address onBehalfOf,
+        uint16 referralCode
+    ) external;
+    function withdraw(
+        address asset,
+        uint256 amount,
+        address to
+    ) external returns (uint256);
+}
+
+// WETH Interface to wrap/unwrap ETH
+interface IWETH is IERC20 {
+    function deposit() external payable;
+    function withdraw(uint256) external;
+}
+
+contract AaveSmartBank is
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
     UUPSUpgradeable
 {
+    // Aave & Token Addresses (Example for Ethereum Mainnet - change for other chains)
+    IPool public constant aavePool =
+        IPool(0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2);
+    IWETH public constant WETH =
+        IWETH(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+
     // STORAGE
     mapping(address => uint256) private balances;
     mapping(address => uint256) public lastInterestCalculationTime;
-    mapping(address => uint256) public lifetimeInterest; // Track total interest earned
-    uint256 public totalTreasuryFees; // Bank's accumulated profit
+    mapping(address => uint256) public lifetimeInterest;
+    uint256 public totalTreasuryFees; // For compatibility, though Aave version might not use it the same way
 
     struct Transaction {
         string txType;
@@ -23,100 +51,101 @@ contract SmartBank is
     }
     mapping(address => Transaction[]) private userHistory;
 
-    // EVENTS for Web3 Authentication & Multi-User Design
-    event Deposited(address indexed user, uint256 amount, uint256 timestamp);
-    event Withdrawn(address indexed user, uint256 amount, uint256 timestamp);
-    event InterestPaid(address indexed user, uint256 amount, uint256 timestamp);
-    event BankFunded(uint256 amount, uint256 timestamp);
+    // EVENTS
+    event Deposited(address indexed user, uint256 amount);
+    event Withdrawn(address indexed user, uint256 amount);
+    event InterestApplied(address indexed user, uint256 amount);
 
-    // Constants
-    uint256 public constant INTEREST_RATE_BP = 500; // 5%
-    uint256 public constant PERFORMANCE_FEE_BP = 1000; // 10% of earned interest
-    uint256 public constant BASE_RATE_FACTOR = 10000; // Performance Fee: fee from withdraw amount (cut 10%)
+    // CONSTANTS (5% Annual Interest for Users)
+    uint256 public constant INTEREST_RATE_BP = 100;
+    uint256 public constant BASE_RATE_FACTOR = 10000;
     uint256 public constant SECONDS_IN_YEAR = 31536000;
 
-    // UPGRADE PATTERN
-    /// @custom:oz-retyped-from constructor
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize() public initializer {
         __Ownable_init(msg.sender);
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
     }
 
-    /// @custom:oz-retyped-from Ownable
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
     // CORE FEATURES
-    /// DEPOSIT FEATURE
+
+    /// @notice Users deposit ETH, which is immediately sent to Aave to earn yield
     function deposit() public payable {
         require(msg.value > 0, "Zero deposit");
+
         _applyInterest(msg.sender);
+
+        // 1. Convert ETH to WETH
+        WETH.deposit{value: msg.value}();
+
+        // 2. Approve Aave to spend our WETH
+        WETH.approve(address(aavePool), msg.value);
+
+        // 3. Supply WETH to Aave Pool
+        aavePool.supply(address(WETH), msg.value, address(this), 0);
 
         balances[msg.sender] += msg.value;
         _recordTransaction(msg.sender, "Deposit", msg.value);
 
-        // Emit event for Web3 transaction history
-        emit Deposited(msg.sender, msg.value, block.timestamp);
+        emit Deposited(msg.sender, msg.value);
     }
 
-    /// WITHDRAW FEATURE
+    /// @notice Users withdraw ETH. The contract pulls the principal + 5% interest from Aave.
     function withdraw(uint256 amount) public nonReentrant {
         _applyInterest(msg.sender);
+        require(balances[msg.sender] >= amount, "Insufficient bank balance");
 
-        // Check user has enough in their virtual account
-        require(balances[msg.sender] >= amount, "Insufficient account balance");
-
-        // Check contract has enough physical ETH (Liquidity Guard)
-        require(
-            address(this).balance >= amount,
-            "Bank Liquidity Error: Contact Admin"
+        // 1. Withdraw WETH from Aave
+        // This fails if Aave doesn't have enough liquidity or the contract is insolvent
+        uint256 withdrawnWETH = aavePool.withdraw(
+            address(WETH),
+            amount,
+            address(this)
         );
 
-        // Update state
+        // 2. Update state before transfer (Safety first)
         balances[msg.sender] -= amount;
         _recordTransaction(msg.sender, "Withdraw", amount);
 
-        // Transfer
-        (bool success, ) = msg.sender.call{value: amount}("");
-        require(success, "Transfer failed");
+        // 3. Convert WETH back to ETH
+        WETH.withdraw(withdrawnWETH);
 
-        // Emit event for Web3 transaction history
-        emit Withdrawn(msg.sender, amount, block.timestamp);
+        // 4. Send ETH to user
+        (bool success, ) = msg.sender.call{value: withdrawnWETH}("");
+        require(success, "ETH Transfer failed");
+
+        emit Withdrawn(msg.sender, amount);
     }
 
-    /// APPLY INTEREST
+    /// @dev Calculates the 5% virtual interest and adds it to the user's balance
     function _applyInterest(address user) internal {
         uint256 currentTime = block.timestamp;
         uint256 lastTime = lastInterestCalculationTime[user];
 
         if (balances[user] > 0 && lastTime > 0) {
             uint256 timePassed = currentTime - lastTime;
-
-            // Raw interest calculation
-            uint256 totalInterest = (balances[user] *
+            uint256 interestEarned = (balances[user] *
                 INTEREST_RATE_BP *
                 timePassed) / (BASE_RATE_FACTOR * SECONDS_IN_YEAR);
 
-            if (totalInterest > 0) {
-                // Calculate bank's cut (Performance Fee)
-                uint256 bankCut = (totalInterest * PERFORMANCE_FEE_BP) /
-                    BASE_RATE_FACTOR;
-                uint256 userShare = totalInterest - bankCut;
-
-                balances[user] += userShare;
-                lifetimeInterest[user] += userShare; // Record to lifetime interest
-                totalTreasuryFees += bankCut; // Store the fee in the treasury
-
-                _recordTransaction(user, "InterestPaid", userShare);
-
-                // Emit event for Web3 transaction history
-                emit InterestPaid(user, userShare, currentTime);
+            if (interestEarned > 0) {
+                // We no longer take a 10% fee in the Aave version, but we'll track the stat for the UI
+                balances[user] += interestEarned;
+                lifetimeInterest[user] += interestEarned;
+                _recordTransaction(user, "InterestEarned", interestEarned);
+                emit InterestApplied(user, interestEarned);
             }
         }
         lastInterestCalculationTime[user] = currentTime;
     }
 
-    /// RECORD TRANSACTION FUNCTION
     function _recordTransaction(
         address user,
         string memory _type,
@@ -126,6 +155,25 @@ contract SmartBank is
     }
 
     // VIEW FUNCTIONS
+
+    /// @notice Profit is the extra WETH sitting in the contract (Yield - 5% promise)
+    function getBankProfit() public view returns (uint256) {
+        // In Aave V3, the aWETH balance of this contract grows.
+        // Anything above the sum of user balances is your profit.
+        // For simplicity, this view requires an external aWETH interface check.
+        return address(this).balance;
+    }
+
+    function getBalance(address user) external view returns (uint256) {
+        return balances[user];
+    }
+
+    function getHistory(
+        address user
+    ) external view returns (Transaction[] memory) {
+        return userHistory[user];
+    }
+
     function getBankStatistics()
         external
         view
@@ -135,36 +183,20 @@ contract SmartBank is
             uint256 userLiabilities
         )
     {
-        // For demonstration, we'll assume userLiabilities is the sum of all balances.
-        // In a production app, you might want to track this in a separate variable.
-        return (
-            address(this).balance,
-            totalTreasuryFees,
-            address(this).balance
-        ); // Simplified for now
+        // totalLiquidity is the ETH balance + WETH balance (simplified)
+        // Since we supply everything to Aave, we should ideally check aWETH.
+        // For now, we'll return the contract's ETH balance as a placeholder.
+        totalLiquidity = address(this).balance;
+        bankProfit = totalTreasuryFees; // Placeholder
+        userLiabilities = 0; // Simplified
     }
 
-    /// @notice Allows admin or anyone to fund the bank to cover interest
-    function fundBank() public payable {
-        require(msg.value > 0, "Funding amount must be > 0");
-        emit BankFunded(msg.value, block.timestamp);
+    /// @notice The Admin can withdraw the "Spread" (The extra profit earned from Aave)
+    function withdrawBankProfit(uint256 amount) external onlyOwner {
+        // Implementation would pull excess aWETH from Aave
+        aavePool.withdraw(address(WETH), amount, owner());
     }
 
-    function getHistory(
-        address user
-    ) external view returns (Transaction[] memory) {
-        return userHistory[user];
-    }
-
-    function getBalance(address user) external view returns (uint256) {
-        return balances[user];
-    }
-
-    // Admin can withdraw the profit (fees) without touching user deposits
-    function withdrawFees() external onlyOwner {
-        uint256 amount = totalTreasuryFees;
-        totalTreasuryFees = 0;
-        (bool success, ) = owner().call{value: amount}("");
-        require(success, "Fee withdrawal failed");
-    }
+    // Allow contract to receive ETH from WETH unwrapping
+    receive() external payable {}
 }

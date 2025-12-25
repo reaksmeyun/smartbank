@@ -1,45 +1,29 @@
-// require("@nomicfoundation/hardhat-toolbox");
-// require("@openzeppelin/hardhat-upgrades");
-
-// module.exports = {
-//   solidity: "0.8.28",
-//   paths: {
-//     sources: "./smart-contract/contracts", // Hardhat looks here for your .sol files
-//     artifacts: "./artifacts",
-//     cache: "./cache",
-//   }
-// };
-
-// require("@nomicfoundation/hardhat-toolbox");
-// require("@openzeppelin/hardhat-upgrades");
-
-// module.exports = {
-//   solidity: "0.8.28",
-//   paths: {
-//     sources: "./smart-contract/contracts",
-//     artifacts: "./artifacts",
-//     cache: "./cache",
-//   },
-//   networks: {
-//     hardhat: {
-//       chainId: 31337, // Explicitly setting the default Hardhat chain ID
-//     },
-//     localhost: {
-//       url: "http://127.0.0.1:8545",
-//       chainId: 31337,
-//     }
-//   }
-// };
-
 require("@nomicfoundation/hardhat-toolbox");
 require("@openzeppelin/hardhat-upgrades");
+require("dotenv").config();
 
 module.exports = {
-  solidity: "0.8.28",
+  solidity: {
+    version: "0.8.28",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
+  },
   networks: {
     hardhat: {
-      chainId: 1337, // Add this line to match MetaMask's expectations
+      chainId: 1337,
+      forking: process.env.MAINNET_RPC_URL ? {
+        url: process.env.MAINNET_RPC_URL,
+        enabled: process.env.FORKING_ENABLED === "true",
+      } : undefined
     },
+    localhost: {
+      url: "http://127.0.0.1:8545",
+      chainId: 1337,
+    }
   },
   paths: {
     sources: "./smart-contract/contracts",

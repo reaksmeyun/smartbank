@@ -134,19 +134,21 @@ const TransactionHistory = ({ limit = 10, showHeader = true, className = '', tra
         const updated = { ...prev };
         updated.totalTransactions += 1;
 
-        switch (newEvent.eventType) {
-          case 'Deposit':
-            updated.totalDeposits += Number(newEvent.amount);
-            updated.depositCount += 1;
-            break;
-          case 'Withdraw':
-            updated.totalWithdrawals += Number(newEvent.amount);
-            updated.withdrawalCount += 1;
-            break;
-          case 'InterestPaid':
-            updated.totalInterestEarned += Number(newEvent.amount);
-            updated.interestCount += 1;
-            break;
+        const type = (newEvent.eventType || '').toLowerCase();
+        const amount = Number(newEvent.amount || 0);
+
+        if (type.includes('deposit')) {
+          updated.totalDeposits += amount;
+          updated.totalInflow += amount;
+          updated.depositCount += 1;
+        } else if (type.includes('withdraw')) {
+          updated.totalWithdrawals += amount;
+          updated.totalOutflow += amount;
+          updated.withdrawalCount += 1;
+        } else if (type.includes('interest')) {
+          updated.totalInterestEarned += amount;
+          updated.totalInflow += amount;
+          updated.interestCount += 1;
         }
 
         return updated;
@@ -296,13 +298,13 @@ const TransactionHistory = ({ limit = 10, showHeader = true, className = '', tra
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center group">
               <div className="text-xl font-extrabold text-green-400 group-hover:scale-110 transition-transform">
-                {parseFloat(stats.totalDeposits).toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                {stats.depositCount || 0}
               </div>
               <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Total Deposits</div>
             </div>
             <div className="text-center group">
               <div className="text-xl font-extrabold text-red-400 group-hover:scale-110 transition-transform">
-                {parseFloat(stats.totalWithdrawals).toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                {stats.withdrawalCount || 0}
               </div>
               <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Total Withdrawals</div>
             </div>
@@ -310,7 +312,7 @@ const TransactionHistory = ({ limit = 10, showHeader = true, className = '', tra
               <div className="text-xl font-extrabold text-blue-400 group-hover:scale-110 transition-transform">
                 {parseFloat(stats.totalInterestEarned).toLocaleString(undefined, { maximumFractionDigits: 4 })}
               </div>
-              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Interest Earned</div>
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Interest Earned</div>
             </div>
             <div className="text-center group">
               <div className="text-xl font-extrabold text-white group-hover:scale-110 transition-transform">
@@ -347,7 +349,6 @@ const TransactionHistory = ({ limit = 10, showHeader = true, className = '', tra
             </div>
           </div>
           <div className="mt-6 p-4 bg-blue-500 bg-opacity-[0.05] rounded-xl border border-blue-400 border-opacity-10 flex items-start space-x-3">
-            <Info className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
             <div className="text-blue-300 text-xs leading-relaxed">
               Interest is compounded automatically upon your next contract interaction.
               Estimates are based on the current 5% annual rate minus 10% bank fee.
@@ -366,47 +367,70 @@ const TransactionHistory = ({ limit = 10, showHeader = true, className = '', tra
           </div>
         ) : (
           <div className="space-y-4">
-            {transactions.map((tx, index) => (
-              <div
-                key={`${tx.transactionHash}-${tx.logIndex}-${index}`}
-                className="flex items-center justify-between p-4 bg-white bg-opacity-5 rounded-lg border border-white border-opacity-10 hover:bg-opacity-10 transition-all duration-200"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className={`p-2 rounded-full ${getTransactionColor(tx.eventType)}`}>
-                    {getTransactionIcon(tx.eventType)}
-                  </div>
-                  <div>
-                    <div className="font-semibold text-white">
-                      {getDisplayTypeName(tx.eventType)}
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      {tx.formattedTimestamp}
-                    </div>
-                  </div>
-                </div>
+            {transactions.filter(tx => !tx.isGroupedChild).map((tx, index) => {
+              const txType = (tx.eventType || tx.type || '').toLowerCase();
+              const isDeposit = txType.includes('deposit') || txType.includes('interest');
+              const hasInterest = tx.interestSettled > 0;
 
-                <div className="text-right">
-                  <div className={`text-lg font-black tracking-tighter ${tx.eventType === 'Deposit' || tx.eventType === 'InterestPaid'
-                    ? 'text-green-400'
-                    : 'text-orange-400'
-                    }`}>
-                    {formatTransactionAmount(tx.amount, tx.eventType)}
+              return (
+                <div
+                  key={`${tx.transactionHash}-${tx.logIndex}-${index}`}
+                  className="p-4 bg-white bg-opacity-5 rounded-lg border border-white border-opacity-10 hover:bg-opacity-10 transition-all duration-200"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className={`p-2 rounded-full ${getTransactionColor(tx.eventType)}`}>
+                        {getTransactionIcon(tx.eventType)}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-white">
+                          {getDisplayTypeName(tx.eventType)}
+                        </div>
+                        <div className="text-sm text-gray-400">
+                          {tx.formattedTimestamp}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <div className={`text-lg font-black tracking-tighter ${isDeposit ? 'text-green-400' : 'text-orange-400'}`}>
+                        {formatTransactionAmount(tx.amount, tx.eventType)}
+                      </div>
+
+                      {tx.balanceAfter && (
+                        <div className="flex items-center justify-end space-x-1 mt-0.5">
+                          <Database className="w-3 h-3 text-blue-400 opacity-50" />
+                          <div className="text-xs font-bold text-blue-300">
+                            {tx.balanceAfter} ETH
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  {tx.balanceAfter && (
-                    <div className="flex items-center justify-end space-x-1 mt-0.5">
-                      <Database className="w-3 h-3 text-blue-400 opacity-50" />
-                      <div className="text-xs font-bold text-blue-300">
-                        {tx.balanceAfter} ETH
+
+                  {/* Grouped Interest Detail */}
+                  {hasInterest && (
+                    <div className="mt-3 pt-3 border-t border-white border-opacity-5 flex items-center justify-between text-xs">
+                      <div className="flex items-center space-x-2 text-blue-400">
+                        <TrendingUp className="w-3 h-3" />
+                        <span className="font-bold uppercase tracking-wider">Interest Settled</span>
+                      </div>
+                      <div className="font-mono text-blue-300 font-bold">
+                        +{tx.interestSettled.toFixed(6)} ETH
                       </div>
                     </div>
                   )}
-                  <div className="text-[10px] font-medium text-gray-500 flex items-center justify-end mt-1 uppercase tracking-widest">
-                    <span>Block #{tx.blockNumber}</span>
-                    <ExternalLink className="w-3 h-3 ml-1 opacity-50" />
+
+                  <div className="mt-2 text-[10px] font-medium text-gray-600 flex items-center justify-between uppercase tracking-widest">
+                    <span className="font-mono opacity-50">{tx.transactionHash ? SmartBankUtils.formatAddress(tx.transactionHash, 8) : 'Internal'}</span>
+                    <div className="flex items-center">
+                      <span>Block #{tx.blockNumber}</span>
+                      <ExternalLink className="w-3 h-3 ml-1 opacity-50" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

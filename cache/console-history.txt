@@ -1,0 +1,22 @@
+const profit = after - before;
+// 4. Calculate the Bank's "Spread"
+console.log("Assets in Aave (After 30 days):", ethers.formatEther(after));
+const after = await aWETH.balanceOf(await bank.getAddress());
+// 3. Check Aave balance AFTER time travel
+await network.provider.send("evm_mine");
+// 2. Jump forward 30 daawait network.provider.send("evm_increaseTime", [2592000]);
+console.log("Assets in Aave (Start):", ethers.formatEther(before));
+const before = await aWETH.balanceOf(await bank.getAddress());
+// 1. Check Aave balance BEFORE time travel
+.help
+console.log("Bank Assets in Aave:", ethers.formatEther(totalAssets), "ETH");
+const totalAssets = await aWETH.balanceOf(await bank.getAddress());
+const aWETH = await ethers.getContractAt("IERC20", aWETH_Address);
+const aWETH_Address = "0x4d5F831a370d03174561a1202331d1007E1a0A09";
+// 3. Check Aave's aWETH balance (Actual Assets)
+console.log("User Balance:", ethers.formatEther(userBalance), "ETH");
+const userBalance = await bank.getBalance("0xYourUserAddress");
+// 2. Check a user's balance (Liability)
+ADDRESS");
+// 1. Get the contract instance
+.help

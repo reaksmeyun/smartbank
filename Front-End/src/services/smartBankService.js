@@ -1,3 +1,4 @@
+/* global BigInt */
 // SmartBank Contract Service
 import { ethers } from 'ethers';
 import { SmartBankABI, CONTRACT_ADDRESSES, NETWORK_CONFIGS, SmartBankUtils } from '../config/SmartBankConfig';
@@ -293,7 +294,7 @@ class SmartBankService {
     const eventHandlers = [];
 
     // Listen for deposits
-    const depositListener = this.contract.on('Deposit', (user, amount, timestamp) => {
+    const depositListener = this.contract.on('Deposited', (user, amount, timestamp) => {
       if (user.toLowerCase() === userAddress.toLowerCase()) {
         callbacks.onDeposit?.({
           user,
@@ -307,7 +308,7 @@ class SmartBankService {
     eventHandlers.push(depositListener);
 
     // Listen for withdrawals
-    const withdrawListener = this.contract.on('Withdraw', (user, amount, timestamp) => {
+    const withdrawListener = this.contract.on('Withdrawn', (user, amount, timestamp) => {
       if (user.toLowerCase() === userAddress.toLowerCase()) {
         callbacks.onWithdraw?.({
           user,
@@ -321,7 +322,7 @@ class SmartBankService {
     eventHandlers.push(withdrawListener);
 
     // Listen for interest payments
-    const interestListener = this.contract.on('InterestPaid', (user, amount, timestamp) => {
+    const interestListener = this.contract.on('InterestApplied', (user, amount, timestamp) => {
       if (user.toLowerCase() === userAddress.toLowerCase()) {
         callbacks.onInterest?.({
           user,
@@ -407,7 +408,7 @@ class SmartBankService {
       const principal = parseFloat(balance);
       const rate = 0.05; // 5% annual rate
       const rawInterest = principal * rate * timePassedYears;
-      const performanceFee = rawInterest * 0.10; // 10% performance fee
+      const performanceFee = 0; // No performance fee in Aave version
       const userInterest = rawInterest - performanceFee;
 
       return {
@@ -451,7 +452,7 @@ class SmartBankService {
       const rawInterest = (principal * BigInt(interestRateBP) * BigInt(timePassed)) /
         (BigInt(baseRateFactor) * BigInt(secondsInYear));
 
-      const performanceFeeBP = 1000; // 10%
+      const performanceFeeBP = 0; // No performance fee in Aave version
       const bankCut = (rawInterest * BigInt(performanceFeeBP)) / BigInt(baseRateFactor);
       const userShare = rawInterest - bankCut;
 

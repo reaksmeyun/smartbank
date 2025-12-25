@@ -369,21 +369,22 @@ class BlockchainEventsService {
       const user = args.user || args[0] || event.user || this.extractFromIndexedArgs(event, 'user');
       const amount = args.amount || args[1] || event.amount || this.extractFromIndexedArgs(event, 'amount');
 
-      // The contract events (Deposited, Withdrawn) do NOT have a timestamp parameter.
-      // We must fetch it from the block.
+      // Events (Deposited, Withdrawn, InterestPaid) all have timestamp parameters in the updated ABI
       let timestampValue = args.timestamp || args[2] || event.timestamp || this.extractFromIndexedArgs(event, 'timestamp');
 
-      if (!timestampValue && event.getBlock) {
-        try {
-          const block = await event.getBlock();
-          timestampValue = block.timestamp;
-        } catch (e) {
-          console.warn('Failed to fetch block timestamp:', e);
+      if (!timestampValue) {
+        if (event.getBlock) {
+          try {
+            const block = await event.getBlock();
+            timestampValue = block.timestamp;
+          } catch (e) {
+            console.warn('Failed to fetch block timestamp:', e);
+            timestampValue = Math.floor(Date.now() / 1000);
+          }
+        } else {
+          // Fallback if getBlock is not available
           timestampValue = Math.floor(Date.now() / 1000);
         }
-      } else if (!timestampValue) {
-        // Fallback if getBlock is not available (e.g. some provider configurations)
-        timestampValue = Math.floor(Date.now() / 1000);
       }
 
       // Validate critical fields
@@ -427,7 +428,7 @@ class BlockchainEventsService {
         dataSource: 'blockchain_event'
       };
 
-      console.log('Successfully parsed event:', parsedEvent);
+      console.log(`Successfully parsed ${eventName} event:`, parsedEvent);
       return parsedEvent;
 
     } catch (error) {

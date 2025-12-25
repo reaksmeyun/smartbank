@@ -2,9 +2,9 @@
 
 // async function main() {
 //   const SmartBank = await ethers.getContractFactory("SmartBankV1");
-  
+
 //   console.log("Deploying SmartBankV1 Proxy...");
-  
+
 //   // This deploys the implementation AND the proxy, and calls initialize()
 //   const bank = await upgrades.deployProxy(SmartBank, [], {
 //     initializer: "initialize",
@@ -28,9 +28,9 @@
 // async function main() {
 //   // Use the name inside the contract file: "SmartBankV1"
 //   const SmartBank = await ethers.getContractFactory("SmartBankV1");
-  
+
 //   console.log("Deploying SmartBankV1 Proxy...");
-  
+
 //   // Deploys Implementation, Proxy, and calls initialize()
 //   const bank = await upgrades.deployProxy(SmartBank, [], {
 //     initializer: "initialize",
@@ -55,9 +55,9 @@
 
 // async function main() {
 //   const SmartBank = await ethers.getContractFactory("SmartBankV1");
-  
+
 //   console.log("Deploying SmartBankV1 Proxy...");
-  
+
 //   const bank = await upgrades.deployProxy(SmartBank, [], {
 //     initializer: "initialize",
 //     kind: "uups",
@@ -80,16 +80,19 @@ const { ethers, upgrades } = require("hardhat");
 
 async function main() {
   // Use the name defined in the 'contract' line of SmartBank.sol
-  const SmartBank = await ethers.getContractFactory("SmartBank"); 
-  
-  console.log("Deploying SmartBank Proxy...");
+  const SmartBank = await ethers.getContractFactory("AaveSmartBank");
+
+  console.log("Deploying AaveSmartBank Proxy...");
   const bank = await upgrades.deployProxy(SmartBank, [], {
     initializer: "initialize",
     kind: "uups",
   });
 
   await bank.waitForDeployment();
-  console.log("SmartBank Proxy deployed to:", await bank.getAddress());
+  const address = await bank.getAddress();
+  console.log("-----------------------------------------");
+  console.log("AaveSmartBank Proxy deployed to:", address);
+  console.log("-----------------------------------------");
 }
 
 main().catch((error) => {

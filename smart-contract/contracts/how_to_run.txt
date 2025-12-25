@@ -13,3 +13,14 @@ $env:NODE_OPTIONS="--no-warnings"; npx hardhat compile
 
 
 NOTE: npx hardhat compile (use this if you have never compile before)
+
+
+
+CHECK Aave to see how much it pays to our smart contract
+npx hardhat run smart-contract/scripts/check_profit.js --network localhost
+
+
+
+reload the page
+localStorage.clear(); 
+location.reload();

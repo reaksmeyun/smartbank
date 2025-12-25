@@ -22,7 +22,8 @@ const DashboardPage = ({ onNavigate }) => {
     connectWallet,
     authenticateWithWeb3,
     isOwner,
-    contract
+    contract,
+    provider
   } = useWeb3();
 
   const { user } = useAuth();
@@ -101,10 +102,16 @@ const DashboardPage = ({ onNavigate }) => {
 
         setEnrichedHistory([...enriched].reverse());
 
-        // Calculate stats
-        const totalDeps = enriched.filter(t => t.eventType === 'Deposit').reduce((a, t) => a + t.amount, 0);
-        const totalWiths = enriched.filter(t => t.eventType === 'Withdraw').reduce((a, t) => a + t.amount, 0);
-        setStats({ deposits: totalDeps.toFixed(4), withdrawals: totalWiths.toFixed(4) });
+        // 5. Load unified stats for aggregate cards
+        const statsResult = await transactionService.getUserTransactionStats(address);
+        if (statsResult.success) {
+          setStats({
+            inflow: statsResult.stats.totalInflow.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 }),
+            outflow: statsResult.stats.totalOutflow.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 }),
+            depositCount: statsResult.stats.depositCount,
+            withdrawalCount: statsResult.stats.withdrawalCount
+          });
+        }
       }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
@@ -116,6 +123,39 @@ const DashboardPage = ({ onNavigate }) => {
   useEffect(() => {
     loadDashboardData();
   }, [loadDashboardData, isConnected]);
+
+  // Initialize unified transaction service
+  useEffect(() => {
+    const initializeService = async () => {
+      if (provider && contract && address && isAuthenticated) {
+        try {
+          const signer = await provider.getSigner();
+          const network = await provider.getNetwork();
+          await transactionService.initialize(provider, signer, contract, network);
+          console.log('Transaction service initialized from Dashboard');
+          loadDashboardData(); // Reload once initialized
+        } catch (error) {
+          console.error('Failed to initialize transaction service in Dashboard:', error);
+        }
+      }
+    };
+
+    initializeService();
+  }, [provider, contract, address, isAuthenticated, loadDashboardData]);
+
+  // Set up real-time subscription for dashboard updates
+  useEffect(() => {
+    if (!isAuthenticated || !address) return;
+
+    const subscription = transactionService.subscribeToUserEvents(address, (newEvent) => {
+      console.log('New event received in Dashboard, refreshing...', newEvent);
+      loadDashboardData();
+    });
+
+    return () => {
+      if (subscription) subscription.unsubscribe();
+    };
+  }, [address, isAuthenticated, loadDashboardData]);
 
   const handleWithdrawFees = async () => {
     if (!isOwner) return;
@@ -301,7 +341,7 @@ const DashboardPage = ({ onNavigate }) => {
                 <ArrowDownCircle className="text-green-400 w-8 h-8" />
                 <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Aggregate Inflow</span>
               </div>
-              <div className="text-4xl font-black text-white tracking-tighter">{stats.deposits} <span className="text-sm opacity-30">ETH</span></div>
+              <div className="text-4xl font-black text-white tracking-tighter">{stats.inflow || '0.0000'} <span className="text-sm opacity-30">ETH</span></div>
             </div>
 
             <div className="bg-white bg-opacity-5 rounded-3xl border border-white border-opacity-10 p-8 hover:bg-opacity-10 transition-all border-l-4 border-l-orange-500">
@@ -309,7 +349,7 @@ const DashboardPage = ({ onNavigate }) => {
                 <ArrowUpCircle className="text-orange-400 w-8 h-8" />
                 <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Aggregate Outflow</span>
               </div>
-              <div className="text-4xl font-black text-white tracking-tighter">{stats.withdrawals} <span className="text-sm opacity-30">ETH</span></div>
+              <div className="text-4xl font-black text-white tracking-tighter">{stats.outflow || '0.0000'} <span className="text-sm opacity-30">ETH</span></div>
             </div>
           </div>
         </div>

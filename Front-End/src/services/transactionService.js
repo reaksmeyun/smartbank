@@ -243,25 +243,65 @@ class TransactionService {
         }
       }
 
-      // Sort transactions
-      transactions.sort((a, b) => {
-        const multiplier = sortOrder === 'desc' ? -1 : 1;
+      // Sort transactions - use a single robust sort
+      const multiplier = sortOrder === 'desc' ? -1 : 1;
+      const sortedTransactions = [...transactions].sort((a, b) => {
         if (sortBy === 'timestamp') {
           return multiplier * (a.timestamp - b.timestamp);
         }
         return multiplier * (a.amount - b.amount);
       });
 
-      // Apply limit
-      const limitedTransactions = transactions.slice(0, limit);
+      // Grouping logic: Merging InterestPaid with its parent transaction (same hash)
+      const groupedMap = new Map();
+      const standaloneInterest = [];
+
+      sortedTransactions.forEach(tx => {
+        const hash = tx.transactionHash;
+        const type = (tx.eventType || tx.type || '').toLowerCase();
+
+        if (!hash || type.includes('interest')) {
+          if (type.includes('interest')) standaloneInterest.push(tx);
+          else groupedMap.set(tx.id || Math.random(), tx);
+          return;
+        }
+
+        if (groupedMap.has(hash)) {
+          // Already have a transaction with this hash, might be interest
+          // (Usually InterestPaid is separate event in same block/tx)
+          const existing = groupedMap.get(hash);
+          existing.relatedEvents = existing.relatedEvents || [];
+          existing.relatedEvents.push(tx);
+        } else {
+          groupedMap.set(hash, { ...tx, interestSettled: 0 });
+        }
+      });
+
+      // Distribute standalone interest to their parents
+      standaloneInterest.forEach(intTx => {
+        const hash = intTx.transactionHash;
+        if (hash && groupedMap.has(hash)) {
+          const parent = groupedMap.get(hash);
+          parent.interestSettled = (parent.interestSettled || 0) + Number(intTx.amount);
+          parent.hasInterest = true;
+          // Also keep the raw interest event for reference if needed
+          parent.interestEvent = intTx;
+        } else {
+          // If no parent found, keep it as its own entry
+          groupedMap.set(intTx.id || `int-${intTx.timestamp}`, intTx);
+        }
+      });
+
+      const finalTransactions = Array.from(groupedMap.values());
+      const limitedTransactions = finalTransactions.slice(0, limit);
 
       return {
         success: true,
         transactions: limitedTransactions,
         dataSource,
         syncStatus,
-        totalCount: limitedTransactions.length,
-        hasMore: transactions.length > limit
+        totalCount: finalTransactions.length,
+        hasMore: finalTransactions.length > limit
       };
 
     } catch (error) {
@@ -349,6 +389,8 @@ class TransactionService {
       const transactions = historyResult.transactions;
 
       const stats = {
+        totalInflow: 0,
+        totalOutflow: 0,
         totalDeposits: 0,
         totalWithdrawals: 0,
         totalInterestEarned: 0,
@@ -360,15 +402,20 @@ class TransactionService {
       };
 
       transactions.forEach(tx => {
-        const type = tx.eventType || tx.type || '';
-        if (type === 'Deposit' || type === 'Deposited') {
-          stats.totalDeposits += tx.amount;
+        const type = (tx.eventType || tx.type || '').toLowerCase();
+        const amount = Number(tx.amount || 0);
+
+        if (type.includes('deposit')) {
+          stats.totalDeposits += amount;
+          stats.totalInflow += amount;
           stats.depositCount++;
-        } else if (type === 'Withdraw' || type === 'Withdrawn') {
-          stats.totalWithdrawals += tx.amount;
+        } else if (type.includes('withdraw')) {
+          stats.totalWithdrawals += amount;
+          stats.totalOutflow += amount;
           stats.withdrawalCount++;
-        } else if (type === 'InterestPaid') {
-          stats.totalInterestEarned += tx.amount;
+        } else if (type.includes('interest')) {
+          stats.totalInterestEarned += amount;
+          stats.totalInflow += amount;
           stats.interestCount++;
         }
       });
@@ -480,7 +527,7 @@ class TransactionService {
       const cleanup = smartBankService.setupEventListeners(userAddress, {
         onDeposit: (event) => callbacks.onDeposit?.(this.normalizeEventData(event, 'Deposit')),
         onWithdraw: (event) => callbacks.onWithdraw?.(this.normalizeEventData(event, 'Withdraw')),
-        onInterest: (event) => callbacks.onInterest?.(this.normalizeEventData(event, 'InterestPaid'))
+        onInterest: (event) => callbacks.onInterest?.(this.normalizeEventData(event, 'InterestApplied'))
       });
 
       this.subscriptions.push(cleanup);
@@ -500,9 +547,12 @@ class TransactionService {
   normalizeTransactionType(txType) {
     const typeMap = {
       'Deposit': 'Deposit',
+      'Deposited': 'Deposit',
       'Withdraw': 'Withdraw',
+      'Withdrawn': 'Withdraw',
       'Interest Earned': 'InterestPaid',
-      'InterestPaid': 'InterestPaid'
+      'InterestPaid': 'InterestPaid',
+      'InterestApplied': 'InterestPaid'
     };
     return typeMap[txType] || txType;
   }

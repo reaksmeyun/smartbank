@@ -1,0 +1,37 @@
+﻿--- BANK PROFIT SCAN ---
+Aave WETH Interest Token (aWETH): 0x0000000000000000000000000000000074948e08
+Current Aave Supply APR: 1.33%
+node.exe : Error: could not decode result data (value="0x", info={ 
+"method": "balanceOf", "signature": "balanceOf(address)" }, 
+code=BAD_DATA, version=6.16.0)
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program 
+Files\nodejs/node_mo ...
++ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Error: could no...ve    
+rsion=6.16.0):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    at makeError (D:\camtech\year-3\blockchain-web-3\project\smartban
+k\node_modules\ethers\src.ts\utils\errors.ts:698:21)
+    at assert (D:\camtech\year-3\blockchain-web-3\project\smartbank\n
+ode_modules\ethers\src.ts\utils\errors.ts:719:25)
+    at Interface.decodeFunctionResult (D:\camtech\year-3\blockchain-w
+eb-3\project\smartbank\node_modules\ethers\src.ts\abi\interface.ts:91
+6:15)
+    at staticCallResult (D:\camtech\year-3\blockchain-web-3\project\s
+martbank\node_modules\ethers\src.ts\contract\contract.ts:346:35)
+    at processTicksAndRejections 
+(node:internal/process/task_queues:103:5)
+    at staticCall (D:\camtech\year-3\blockchain-web-3\project\smartba
+nk\node_modules\ethers\src.ts\contract\contract.ts:303:24)
+    at Proxy.balanceOf (D:\camtech\year-3\blockchain-web-3\project\sm
+artbank\node_modules\ethers\src.ts\contract\contract.ts:351:41)
+    at main (D:\camtech\year-3\blockchain-web-3\project\smartbank\sma
+rt-contract\scripts\check_profit.js:28:25) {
+  code: 'BAD_DATA',
+  value: '0x',
+  info: { method: 'balanceOf', signature: 'balanceOf(address)' },
+  shortMessage: 'could not decode result data'
+}
