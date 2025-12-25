@@ -23,21 +23,55 @@ import type {
   TypedContractMethod,
 } from "../common";
 
+export declare namespace SmartBank {
+  export type TransactionStruct = {
+    txType: string;
+    amount: BigNumberish;
+    timestamp: BigNumberish;
+  };
+
+  export type TransactionStructOutput = [
+    txType: string,
+    amount: bigint,
+    timestamp: bigint
+  ] & { txType: string; amount: bigint; timestamp: bigint };
+}
+
 export interface SmartBankInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "BASE_RATE_FACTOR"
       | "INTEREST_RATE_BP"
+      | "PERFORMANCE_FEE_BP"
+      | "SECONDS_IN_YEAR"
+      | "UPGRADE_INTERFACE_VERSION"
       | "deposit"
+      | "fundBank"
       | "getBalance"
+      | "getBankStatistics"
+      | "getHistory"
+      | "initialize"
       | "lastInterestCalculationTime"
+      | "lifetimeInterest"
       | "owner"
-      | "rescueEther"
+      | "proxiableUUID"
+      | "renounceOwnership"
+      | "totalTreasuryFees"
+      | "transferOwnership"
+      | "upgradeToAndCall"
       | "withdraw"
+      | "withdrawFees"
   ): FunctionFragment;
 
   getEvent(
-    nameOrSignatureOrTopic: "Deposit" | "InterestApplied" | "Withdraw"
+    nameOrSignatureOrTopic:
+      | "BankFunded"
+      | "Deposited"
+      | "Initialized"
+      | "InterestPaid"
+      | "OwnershipTransferred"
+      | "Upgraded"
+      | "Withdrawn"
   ): EventFragment;
 
   encodeFunctionData(
@@ -48,23 +82,72 @@ export interface SmartBankInterface extends Interface {
     functionFragment: "INTEREST_RATE_BP",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "PERFORMANCE_FEE_BP",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "SECONDS_IN_YEAR",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "UPGRADE_INTERFACE_VERSION",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "deposit", values?: undefined): string;
+  encodeFunctionData(functionFragment: "fundBank", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getBalance",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getBankStatistics",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getHistory",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "initialize",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "lastInterestCalculationTime",
     values: [AddressLike]
   ): string;
+  encodeFunctionData(
+    functionFragment: "lifetimeInterest",
+    values: [AddressLike]
+  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "rescueEther",
-    values: [BigNumberish]
+    functionFragment: "proxiableUUID",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "renounceOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "totalTreasuryFees",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "upgradeToAndCall",
+    values: [AddressLike, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "withdraw",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "withdrawFees",
+    values?: undefined
   ): string;
 
   decodeFunctionResult(
@@ -75,26 +158,69 @@ export interface SmartBankInterface extends Interface {
     functionFragment: "INTEREST_RATE_BP",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "PERFORMANCE_FEE_BP",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "SECONDS_IN_YEAR",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "UPGRADE_INTERFACE_VERSION",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "fundBank", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getBalance", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getBankStatistics",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "getHistory", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "lastInterestCalculationTime",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "lifetimeInterest",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "rescueEther",
+    functionFragment: "proxiableUUID",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "renounceOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "totalTreasuryFees",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "upgradeToAndCall",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawFees",
+    data: BytesLike
+  ): Result;
 }
 
-export namespace DepositEvent {
-  export type InputTuple = [user: AddressLike, amount: BigNumberish];
-  export type OutputTuple = [user: string, amount: bigint];
+export namespace BankFundedEvent {
+  export type InputTuple = [amount: BigNumberish, timestamp: BigNumberish];
+  export type OutputTuple = [amount: bigint, timestamp: bigint];
   export interface OutputObject {
-    user: string;
     amount: bigint;
+    timestamp: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -102,21 +228,17 @@ export namespace DepositEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace InterestAppliedEvent {
+export namespace DepositedEvent {
   export type InputTuple = [
     user: AddressLike,
-    principal: BigNumberish,
-    interestAmount: BigNumberish
+    amount: BigNumberish,
+    timestamp: BigNumberish
   ];
-  export type OutputTuple = [
-    user: string,
-    principal: bigint,
-    interestAmount: bigint
-  ];
+  export type OutputTuple = [user: string, amount: bigint, timestamp: bigint];
   export interface OutputObject {
     user: string;
-    principal: bigint;
-    interestAmount: bigint;
+    amount: bigint;
+    timestamp: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -124,12 +246,72 @@ export namespace InterestAppliedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace WithdrawEvent {
-  export type InputTuple = [user: AddressLike, amount: BigNumberish];
-  export type OutputTuple = [user: string, amount: bigint];
+export namespace InitializedEvent {
+  export type InputTuple = [version: BigNumberish];
+  export type OutputTuple = [version: bigint];
+  export interface OutputObject {
+    version: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace InterestPaidEvent {
+  export type InputTuple = [
+    user: AddressLike,
+    amount: BigNumberish,
+    timestamp: BigNumberish
+  ];
+  export type OutputTuple = [user: string, amount: bigint, timestamp: bigint];
   export interface OutputObject {
     user: string;
     amount: bigint;
+    timestamp: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace OwnershipTransferredEvent {
+  export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
+  export type OutputTuple = [previousOwner: string, newOwner: string];
+  export interface OutputObject {
+    previousOwner: string;
+    newOwner: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace UpgradedEvent {
+  export type InputTuple = [implementation: AddressLike];
+  export type OutputTuple = [implementation: string];
+  export interface OutputObject {
+    implementation: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace WithdrawnEvent {
+  export type InputTuple = [
+    user: AddressLike,
+    amount: BigNumberish,
+    timestamp: BigNumberish
+  ];
+  export type OutputTuple = [user: string, amount: bigint, timestamp: bigint];
+  export interface OutputObject {
+    user: string;
+    amount: bigint;
+    timestamp: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -184,9 +366,37 @@ export interface SmartBank extends BaseContract {
 
   INTEREST_RATE_BP: TypedContractMethod<[], [bigint], "view">;
 
+  PERFORMANCE_FEE_BP: TypedContractMethod<[], [bigint], "view">;
+
+  SECONDS_IN_YEAR: TypedContractMethod<[], [bigint], "view">;
+
+  UPGRADE_INTERFACE_VERSION: TypedContractMethod<[], [string], "view">;
+
   deposit: TypedContractMethod<[], [void], "payable">;
 
-  getBalance: TypedContractMethod<[], [bigint], "view">;
+  fundBank: TypedContractMethod<[], [void], "payable">;
+
+  getBalance: TypedContractMethod<[user: AddressLike], [bigint], "view">;
+
+  getBankStatistics: TypedContractMethod<
+    [],
+    [
+      [bigint, bigint, bigint] & {
+        totalLiquidity: bigint;
+        bankProfit: bigint;
+        userLiabilities: bigint;
+      }
+    ],
+    "view"
+  >;
+
+  getHistory: TypedContractMethod<
+    [user: AddressLike],
+    [SmartBank.TransactionStructOutput[]],
+    "view"
+  >;
+
+  initialize: TypedContractMethod<[], [void], "nonpayable">;
 
   lastInterestCalculationTime: TypedContractMethod<
     [arg0: AddressLike],
@@ -194,15 +404,31 @@ export interface SmartBank extends BaseContract {
     "view"
   >;
 
+  lifetimeInterest: TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
+
   owner: TypedContractMethod<[], [string], "view">;
 
-  rescueEther: TypedContractMethod<
-    [amount: BigNumberish],
+  proxiableUUID: TypedContractMethod<[], [string], "view">;
+
+  renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
+
+  totalTreasuryFees: TypedContractMethod<[], [bigint], "view">;
+
+  transferOwnership: TypedContractMethod<
+    [newOwner: AddressLike],
     [void],
     "nonpayable"
   >;
 
+  upgradeToAndCall: TypedContractMethod<
+    [newImplementation: AddressLike, data: BytesLike],
+    [void],
+    "payable"
+  >;
+
   withdraw: TypedContractMethod<[amount: BigNumberish], [void], "nonpayable">;
+
+  withdrawFees: TypedContractMethod<[], [void], "nonpayable">;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
@@ -215,78 +441,207 @@ export interface SmartBank extends BaseContract {
     nameOrSignature: "INTEREST_RATE_BP"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
+    nameOrSignature: "PERFORMANCE_FEE_BP"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "SECONDS_IN_YEAR"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "UPGRADE_INTERFACE_VERSION"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
     nameOrSignature: "deposit"
   ): TypedContractMethod<[], [void], "payable">;
   getFunction(
+    nameOrSignature: "fundBank"
+  ): TypedContractMethod<[], [void], "payable">;
+  getFunction(
     nameOrSignature: "getBalance"
-  ): TypedContractMethod<[], [bigint], "view">;
+  ): TypedContractMethod<[user: AddressLike], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getBankStatistics"
+  ): TypedContractMethod<
+    [],
+    [
+      [bigint, bigint, bigint] & {
+        totalLiquidity: bigint;
+        bankProfit: bigint;
+        userLiabilities: bigint;
+      }
+    ],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getHistory"
+  ): TypedContractMethod<
+    [user: AddressLike],
+    [SmartBank.TransactionStructOutput[]],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "initialize"
+  ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "lastInterestCalculationTime"
+  ): TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "lifetimeInterest"
   ): TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
   getFunction(
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "rescueEther"
-  ): TypedContractMethod<[amount: BigNumberish], [void], "nonpayable">;
+    nameOrSignature: "proxiableUUID"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "renounceOwnership"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "totalTreasuryFees"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "transferOwnership"
+  ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "upgradeToAndCall"
+  ): TypedContractMethod<
+    [newImplementation: AddressLike, data: BytesLike],
+    [void],
+    "payable"
+  >;
   getFunction(
     nameOrSignature: "withdraw"
   ): TypedContractMethod<[amount: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "withdrawFees"
+  ): TypedContractMethod<[], [void], "nonpayable">;
 
   getEvent(
-    key: "Deposit"
+    key: "BankFunded"
   ): TypedContractEvent<
-    DepositEvent.InputTuple,
-    DepositEvent.OutputTuple,
-    DepositEvent.OutputObject
+    BankFundedEvent.InputTuple,
+    BankFundedEvent.OutputTuple,
+    BankFundedEvent.OutputObject
   >;
   getEvent(
-    key: "InterestApplied"
+    key: "Deposited"
   ): TypedContractEvent<
-    InterestAppliedEvent.InputTuple,
-    InterestAppliedEvent.OutputTuple,
-    InterestAppliedEvent.OutputObject
+    DepositedEvent.InputTuple,
+    DepositedEvent.OutputTuple,
+    DepositedEvent.OutputObject
   >;
   getEvent(
-    key: "Withdraw"
+    key: "Initialized"
   ): TypedContractEvent<
-    WithdrawEvent.InputTuple,
-    WithdrawEvent.OutputTuple,
-    WithdrawEvent.OutputObject
+    InitializedEvent.InputTuple,
+    InitializedEvent.OutputTuple,
+    InitializedEvent.OutputObject
+  >;
+  getEvent(
+    key: "InterestPaid"
+  ): TypedContractEvent<
+    InterestPaidEvent.InputTuple,
+    InterestPaidEvent.OutputTuple,
+    InterestPaidEvent.OutputObject
+  >;
+  getEvent(
+    key: "OwnershipTransferred"
+  ): TypedContractEvent<
+    OwnershipTransferredEvent.InputTuple,
+    OwnershipTransferredEvent.OutputTuple,
+    OwnershipTransferredEvent.OutputObject
+  >;
+  getEvent(
+    key: "Upgraded"
+  ): TypedContractEvent<
+    UpgradedEvent.InputTuple,
+    UpgradedEvent.OutputTuple,
+    UpgradedEvent.OutputObject
+  >;
+  getEvent(
+    key: "Withdrawn"
+  ): TypedContractEvent<
+    WithdrawnEvent.InputTuple,
+    WithdrawnEvent.OutputTuple,
+    WithdrawnEvent.OutputObject
   >;
 
   filters: {
-    "Deposit(address,uint256)": TypedContractEvent<
-      DepositEvent.InputTuple,
-      DepositEvent.OutputTuple,
-      DepositEvent.OutputObject
+    "BankFunded(uint256,uint256)": TypedContractEvent<
+      BankFundedEvent.InputTuple,
+      BankFundedEvent.OutputTuple,
+      BankFundedEvent.OutputObject
     >;
-    Deposit: TypedContractEvent<
-      DepositEvent.InputTuple,
-      DepositEvent.OutputTuple,
-      DepositEvent.OutputObject
-    >;
-
-    "InterestApplied(address,uint256,uint256)": TypedContractEvent<
-      InterestAppliedEvent.InputTuple,
-      InterestAppliedEvent.OutputTuple,
-      InterestAppliedEvent.OutputObject
-    >;
-    InterestApplied: TypedContractEvent<
-      InterestAppliedEvent.InputTuple,
-      InterestAppliedEvent.OutputTuple,
-      InterestAppliedEvent.OutputObject
+    BankFunded: TypedContractEvent<
+      BankFundedEvent.InputTuple,
+      BankFundedEvent.OutputTuple,
+      BankFundedEvent.OutputObject
     >;
 
-    "Withdraw(address,uint256)": TypedContractEvent<
-      WithdrawEvent.InputTuple,
-      WithdrawEvent.OutputTuple,
-      WithdrawEvent.OutputObject
+    "Deposited(address,uint256,uint256)": TypedContractEvent<
+      DepositedEvent.InputTuple,
+      DepositedEvent.OutputTuple,
+      DepositedEvent.OutputObject
     >;
-    Withdraw: TypedContractEvent<
-      WithdrawEvent.InputTuple,
-      WithdrawEvent.OutputTuple,
-      WithdrawEvent.OutputObject
+    Deposited: TypedContractEvent<
+      DepositedEvent.InputTuple,
+      DepositedEvent.OutputTuple,
+      DepositedEvent.OutputObject
+    >;
+
+    "Initialized(uint64)": TypedContractEvent<
+      InitializedEvent.InputTuple,
+      InitializedEvent.OutputTuple,
+      InitializedEvent.OutputObject
+    >;
+    Initialized: TypedContractEvent<
+      InitializedEvent.InputTuple,
+      InitializedEvent.OutputTuple,
+      InitializedEvent.OutputObject
+    >;
+
+    "InterestPaid(address,uint256,uint256)": TypedContractEvent<
+      InterestPaidEvent.InputTuple,
+      InterestPaidEvent.OutputTuple,
+      InterestPaidEvent.OutputObject
+    >;
+    InterestPaid: TypedContractEvent<
+      InterestPaidEvent.InputTuple,
+      InterestPaidEvent.OutputTuple,
+      InterestPaidEvent.OutputObject
+    >;
+
+    "OwnershipTransferred(address,address)": TypedContractEvent<
+      OwnershipTransferredEvent.InputTuple,
+      OwnershipTransferredEvent.OutputTuple,
+      OwnershipTransferredEvent.OutputObject
+    >;
+    OwnershipTransferred: TypedContractEvent<
+      OwnershipTransferredEvent.InputTuple,
+      OwnershipTransferredEvent.OutputTuple,
+      OwnershipTransferredEvent.OutputObject
+    >;
+
+    "Upgraded(address)": TypedContractEvent<
+      UpgradedEvent.InputTuple,
+      UpgradedEvent.OutputTuple,
+      UpgradedEvent.OutputObject
+    >;
+    Upgraded: TypedContractEvent<
+      UpgradedEvent.InputTuple,
+      UpgradedEvent.OutputTuple,
+      UpgradedEvent.OutputObject
+    >;
+
+    "Withdrawn(address,uint256,uint256)": TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
+    >;
+    Withdrawn: TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
     >;
   };
 }

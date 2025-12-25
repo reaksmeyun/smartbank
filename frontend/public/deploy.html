@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Deploy SmartBank</title>
+</head>
+
+<body>
+    <h1>Deploy SmartBank</h1>
+    <button id="connectBtn">Connect Wallet</button>
+    <button id="deployBtn" disabled>Deploy Contract</button>
+    <pre id="status"></pre>
+
+    <script type="module">
+        import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.min.js";
+
+        let signer;
+
+        function log(msg) {
+            document.getElementById('status').innerText += msg + "\n";
+            console.log(msg);
+        }
+
+        document.getElementById('connectBtn').onclick = async () => {
+            try {
+                if (!window.ethereum) return alert("No MetaMask!");
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                signer = await provider.getSigner();
+                log("Connected: " + await signer.getAddress());
+                document.getElementById('deployBtn').disabled = false;
+            } catch (e) {
+                log("Error: " + e.message);
+            }
+        };
+
+        document.getElementById('deployBtn').onclick = async () => {
+            try {
+                log("Fetching Artifact...");
+                const response = await fetch('./SmartBank.json');
+                const artifact = await response.json();
+
+                log("Deploying...");
+                const factory = new ethers.ContractFactory(artifact.abi, artifact.bytecode, signer);
+
+                // Deploy
+                const contract = await factory.deploy();
+                log("Transaction sent. Waiting for confirmation...");
+
+                await contract.waitForDeployment();
+                const address = await contract.getAddress();
+
+                log("------------------------------------------------");
+                log("DEPLOYED SUCCESSFULLY!");
+                log("CONTRACT ADDRESS: " + address);
+                log("------------------------------------------------");
+                log("Please copy this address and provide it to the assistant.");
+
+                // Initialize
+                log("Initializing contract...");
+                const tx = await contract.initialize();
+                await tx.wait();
+                log("Contract Initialized.");
+
+            } catch (e) {
+                log("Deploy Error: " + e.message);
+                console.error(e);
+            }
+        };
+    </script>
+</body>
+
+</html>

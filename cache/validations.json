@@ -522,42 +522,6 @@
         },
         "solcVersion": "0.8.28"
       },
-      "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard": {
-        "src": "@openzeppelin\\contracts\\utils\\ReentrancyGuard.sol:25",
-        "inherit": [],
-        "libraries": [],
-        "methods": [],
-        "linkReferences": [],
-        "errors": [
-          {
-            "kind": "constructor",
-            "contract": "ReentrancyGuard",
-            "src": "@openzeppelin\\contracts\\utils\\ReentrancyGuard.sol:47"
-          }
-        ],
-        "layout": {
-          "storage": [
-            {
-              "label": "_status",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_uint256",
-              "contract": "ReentrancyGuard",
-              "src": "@openzeppelin\\contracts\\utils\\ReentrancyGuard.sol:40"
-            }
-          ],
-          "types": {
-            "t_uint256": {
-              "label": "uint256",
-              "numberOfBytes": "32"
-            }
-          },
-          "layoutVersion": "1.2",
-          "flat": true,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.28"
-      },
       "@openzeppelin/contracts/utils/StorageSlot.sol:StorageSlot": {
         "src": "@openzeppelin\\contracts\\utils\\StorageSlot.sol:34",
         "version": {
@@ -579,123 +543,28 @@
         },
         "solcVersion": "0.8.28"
       },
-      "smart-contract/contracts/Counter.sol:Counter": {
-        "src": "smart-contract\\contracts\\Counter.sol:4",
-        "version": {
-          "withMetadata": "4fffd76a16d54f069860de4a35bfce075c423eddcc731459008a0f9291213287",
-          "withoutMetadata": "ccc224e3ebe0a379fc39d5c12940d7c8e582aa5da830d89908069713d4e1410a",
-          "linkedWithoutMetadata": "ccc224e3ebe0a379fc39d5c12940d7c8e582aa5da830d89908069713d4e1410a"
-        },
-        "inherit": [],
-        "libraries": [],
-        "methods": [
-          "inc()",
-          "incBy(uint256)"
-        ],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [
-            {
-              "label": "x",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_uint256",
-              "contract": "Counter",
-              "src": "smart-contract\\contracts\\Counter.sol:5"
-            }
-          ],
-          "types": {
-            "t_uint256": {
-              "label": "uint256",
-              "numberOfBytes": "32"
-            }
-          },
-          "layoutVersion": "1.2",
-          "flat": true,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.28"
-      },
-      "smart-contract/contracts/MyToken.sol:MyToken": {
-        "src": "smart-contract\\contracts\\MyToken.sol:6",
-        "version": {
-          "withMetadata": "d0babc9d83b52e033b1db9dd8f1925d1a68ae12d308b0961425cb5cc4d27dd1d",
-          "withoutMetadata": "cd0944d6239dc55bc0dbd73c36526843c94bba86f2734d04e911539310ee916b",
-          "linkedWithoutMetadata": "cd0944d6239dc55bc0dbd73c36526843c94bba86f2734d04e911539310ee916b"
-        },
-        "inherit": [
-          "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard"
-        ],
-        "libraries": [],
-        "methods": [
-          "deposit()",
-          "withdraw(uint256)",
-          "getBalance()"
-        ],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [
-            {
-              "label": "_status",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_uint256",
-              "contract": "ReentrancyGuard",
-              "src": "@openzeppelin\\contracts\\utils\\ReentrancyGuard.sol:40"
-            },
-            {
-              "label": "balances",
-              "offset": 0,
-              "slot": "1",
-              "type": "t_mapping(t_address,t_uint256)",
-              "contract": "MyToken",
-              "src": "smart-contract\\contracts\\MyToken.sol:7"
-            }
-          ],
-          "types": {
-            "t_address": {
-              "label": "address",
-              "numberOfBytes": "20"
-            },
-            "t_mapping(t_address,t_uint256)": {
-              "label": "mapping(address => uint256)",
-              "numberOfBytes": "32"
-            },
-            "t_uint256": {
-              "label": "uint256",
-              "numberOfBytes": "32"
-            }
-          },
-          "layoutVersion": "1.2",
-          "flat": true,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.28"
-      },
       "smart-contract/contracts/SmartBank.sol:SmartBank": {
-        "src": "smart-contract\\contracts\\SmartBank.sol:9",
+        "src": "smart-contract\\contracts\\SmartBank.sol:8",
         "version": {
-          "withMetadata": "37b5ccebda2002b1939998659d499819b332598c410213a47cbe4cdbcf027f06",
-          "withoutMetadata": "d0c6a672f0985eead0d3088cc8e61b4d9749500ec278e398af0583435daaf19e",
-          "linkedWithoutMetadata": "d0c6a672f0985eead0d3088cc8e61b4d9749500ec278e398af0583435daaf19e"
+          "withMetadata": "10018f00144dc748c95bfba1f7b7a66cd3ba5747fadd15bf15c04a5a27a3cb79",
+          "withoutMetadata": "7c272042d04c963c09565821de8d3ed97af07a3c7f1d7f20ae123426da4b4923",
+          "linkedWithoutMetadata": "7c272042d04c963c09565821de8d3ed97af07a3c7f1d7f20ae123426da4b4923"
         },
         "inherit": [
+          "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:UUPSUpgradeable",
+          "@openzeppelin/contracts/interfaces/draft-IERC1822.sol:IERC1822Proxiable",
           "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:ReentrancyGuardUpgradeable",
           "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:OwnableUpgradeable",
           "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:ContextUpgradeable",
-          "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:UUPSUpgradeable",
-          "@openzeppelin/contracts/interfaces/draft-IERC1822.sol:IERC1822Proxiable",
           "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:Initializable"
         ],
         "libraries": [],
         "methods": [
-          "()",
           "initialize()",
           "deposit()",
           "withdraw(uint256)",
           "getBankStatistics()",
+          "fundBank()",
           "getHistory(address)",
           "getBalance(address)",
           "withdrawFees()"
@@ -710,7 +579,7 @@
               "slot": "0",
               "type": "t_mapping(t_address,t_uint256)",
               "contract": "SmartBank",
-              "src": "smart-contract\\contracts\\SmartBank.sol:16"
+              "src": "smart-contract\\contracts\\SmartBank.sol:14"
             },
             {
               "label": "lastInterestCalculationTime",
@@ -718,23 +587,31 @@
               "slot": "1",
               "type": "t_mapping(t_address,t_uint256)",
               "contract": "SmartBank",
-              "src": "smart-contract\\contracts\\SmartBank.sol:17"
+              "src": "smart-contract\\contracts\\SmartBank.sol:15"
+            },
+            {
+              "label": "lifetimeInterest",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_mapping(t_address,t_uint256)",
+              "contract": "SmartBank",
+              "src": "smart-contract\\contracts\\SmartBank.sol:16"
             },
             {
               "label": "totalTreasuryFees",
               "offset": 0,
-              "slot": "2",
+              "slot": "3",
               "type": "t_uint256",
               "contract": "SmartBank",
-              "src": "smart-contract\\contracts\\SmartBank.sol:18"
+              "src": "smart-contract\\contracts\\SmartBank.sol:17"
             },
             {
               "label": "userHistory",
               "offset": 0,
-              "slot": "3",
-              "type": "t_mapping(t_address,t_array(t_struct(Transaction)1776_storage)dyn_storage)",
+              "slot": "4",
+              "type": "t_mapping(t_address,t_array(t_struct(Transaction)1592_storage)dyn_storage)",
               "contract": "SmartBank",
-              "src": "smart-contract\\contracts\\SmartBank.sol:25"
+              "src": "smart-contract\\contracts\\SmartBank.sol:24"
             }
           ],
           "types": {
@@ -796,11 +673,11 @@
               "label": "uint64",
               "numberOfBytes": "8"
             },
-            "t_array(t_struct(Transaction)1776_storage)dyn_storage": {
+            "t_array(t_struct(Transaction)1592_storage)dyn_storage": {
               "label": "struct SmartBank.Transaction[]",
               "numberOfBytes": "32"
             },
-            "t_mapping(t_address,t_array(t_struct(Transaction)1776_storage)dyn_storage)": {
+            "t_mapping(t_address,t_array(t_struct(Transaction)1592_storage)dyn_storage)": {
               "label": "mapping(address => struct SmartBank.Transaction[])",
               "numberOfBytes": "32"
             },
@@ -812,7 +689,7 @@
               "label": "string",
               "numberOfBytes": "32"
             },
-            "t_struct(Transaction)1776_storage": {
+            "t_struct(Transaction)1592_storage": {
               "label": "struct SmartBank.Transaction",
               "members": [
                 {

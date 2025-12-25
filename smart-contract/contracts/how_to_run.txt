@@ -6,6 +6,7 @@ npx hardhat node
 npx hardhat run smart-contract/scripts/deploy.js --network localhost
 // if you want to test with deposit or withdraw, use the test folder
 npx hardhat run smart-contract/test/test-bank.js --network localhost
+npx hardhat test smart-contract/test/test-bank.js --network localhost
 
 NOTE: if we change the solidity code then run this (Only do this if you changed your code)
 $env:NODE_OPTIONS="--no-warnings"; npx hardhat compile

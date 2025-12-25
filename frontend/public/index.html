@@ -1,29 +1,29 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartBank Pro | Localhost</title>
+    <title>SmartBank Pro | DeFi Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-green { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .active-dot { animation: pulse-green 2s infinite; }
+    </style>
 </head>
 <body class="bg-gray-100 p-4 md:p-8 font-sans">
     <div class="max-w-4xl mx-auto space-y-6">
         
-        <header class="bg-white p-6 rounded-2xl shadow-sm border flex flex-col md:row justify-between items-center gap-4">
-            <div class="space-y-1 text-center md:text-left">
+        <header class="bg-white p-6 rounded-2xl shadow-sm border flex justify-between items-center gap-4">
+            <div class="space-y-1">
                 <h1 class="text-3xl font-extrabold text-blue-600">SmartBank</h1>
-                <div id="accountDisplay" class="flex items-center justify-center md:justify-start gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200">
+                <div id="accountDisplay" class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200">
                     <span id="statusIndicator" class="w-2.5 h-2.5 bg-gray-300 rounded-full"></span>
                     <span id="userAddressDisplay" class="text-xs font-mono text-slate-600 font-bold">Not Connected</span>
                 </div>
             </div>
             <div class="flex gap-3">
-                <button id="switchBtn" class="hidden bg-white text-slate-700 px-5 py-2.5 rounded-xl font-bold border border-slate-200 hover:bg-slate-50 transition-all shadow-sm">
-                    Switch Account
-                </button>
-                <button id="connectBtn" class="bg-blue-600 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all">
-                    Connect Wallet
-                </button>
+                <button id="switchBtn" class="hidden bg-white text-slate-700 px-5 py-2.5 rounded-xl font-bold border border-slate-200 hover:bg-slate-50 transition-all shadow-sm">Switch</button>
+                <button id="connectBtn" class="bg-blue-600 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-blue-700 shadow-lg transition-all">Connect Wallet</button>
             </div>
         </header>
 
@@ -31,12 +31,11 @@
             <div class="bg-indigo-600 p-8 rounded-3xl text-white shadow-xl">
                 <p class="text-indigo-200 text-xs font-bold uppercase tracking-widest">In Your Wallet</p>
                 <h2 class="text-4xl font-black mt-2"><span id="walletBal">0.00</span> <span class="text-xl font-normal opacity-60">ETH</span></h2>
-                <p class="text-[10px] mt-4 opacity-50 uppercase font-bold">Hardhat Account Funds</p>
             </div>
-            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
                 <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Bank Deposit</p>
                 <h2 class="text-4xl font-black mt-2 text-slate-800"><span id="bankBal">0.00</span> <span class="text-xl font-normal text-slate-300">ETH</span></h2>
-                <p class="text-[10px] mt-4 text-green-600 font-bold uppercase">5% APY Accruing</p>
+                <div class="text-[10px] text-green-500 font-bold mt-2">+ 5.0% APY</div>
             </div>
             <div class="bg-slate-900 p-8 rounded-3xl text-white shadow-xl">
                 <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">Treasury Profit</p>
@@ -49,34 +48,36 @@
             <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
                 <h3 class="text-lg font-bold text-slate-800 mb-6">Deposit / Withdraw</h3>
                 <div class="space-y-4">
-                    <div class="relative">
-                        <input type="number" id="amtInput" placeholder="0.0" step="0.1" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-xl">
-                        <span class="absolute right-4 top-4 text-slate-400 font-bold">ETH</span>
-                    </div>
+                    <input type="number" id="amtInput" placeholder="0.0" step="0.01" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-xl">
                     <div class="flex gap-3">
-                        <button onclick="handleAction('deposit')" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-4 rounded-2xl font-black text-lg transition-transform active:scale-95 shadow-lg shadow-green-100">DEPOSIT</button>
+                        <button onclick="handleAction('deposit')" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-transform active:scale-95">DEPOSIT</button>
                         <button onclick="handleAction('withdraw')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-4 rounded-2xl font-black text-lg transition-transform active:scale-95">WITHDRAW</button>
                     </div>
                 </div>
             </div>
 
             <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-                <h3 class="text-lg font-bold text-slate-800 mb-6">Peer Transfer</h3>
+                <h3 class="text-lg font-bold text-slate-800 mb-6">Bank Transfer (Internal)</h3>
                 <div class="space-y-4">
                     <input type="text" id="targetAddr" placeholder="Recipient 0x..." class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-mono text-sm outline-none focus:border-purple-500">
-                    <button onclick="handleTransfer()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-purple-100 transition-all">SEND 1.0 ETH</button>
+                    <input type="number" id="transferAmt" placeholder="Transfer Amount" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-lg outline-none focus:border-purple-500">
+                    <button onclick="handleTransfer()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-transform active:scale-95">SEND INTERNALLY</button>
                 </div>
             </div>
         </div>
+
+        <div id="statusLog" class="text-center text-xs font-mono text-slate-400 uppercase tracking-widest">System Ready</div>
     </div>
 
     <script type="module">
         import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.min.js";
 
+        // CONFIGURATION
         const PROXY_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
         const ABI = [
             "function deposit() public payable",
             "function withdraw(uint256 amount) public",
+            "function transfer(address to, uint256 amount) public",
             "function getBalance(address user) view returns (uint256)",
             "function getBankStatistics() view returns (uint256 totalLiquidity, uint256 bankProfit)",
             "function owner() view returns (address)",
@@ -88,23 +89,12 @@
         async function init() {
             if (window.ethereum) {
                 provider = new ethers.BrowserProvider(window.ethereum);
-
-                // RELOAD ON ACCOUNT/NETWORK SWITCH
                 window.ethereum.on('accountsChanged', () => window.location.reload());
-                window.ethereum.on('chainChanged', () => window.location.reload());
-
                 document.getElementById('connectBtn').onclick = connect;
                 document.getElementById('switchBtn').onclick = switchAccount;
+            } else {
+                logStatus("MetaMask Not Detected");
             }
-        }
-
-        async function switchAccount() {
-            try {
-                await window.ethereum.request({
-                    method: "wallet_requestPermissions",
-                    params: [{ eth_accounts: {} }]
-                });
-            } catch (e) { console.error(e); }
         }
 
         async function connect() {
@@ -115,17 +105,60 @@
                 
                 document.getElementById('connectBtn').classList.add('hidden');
                 document.getElementById('switchBtn').classList.remove('hidden');
-                document.getElementById('statusIndicator').classList.replace('bg-gray-300', 'bg-green-500');
+                document.getElementById('statusIndicator').className = "w-2.5 h-2.5 bg-green-500 rounded-full active-dot";
                 
-                refreshData();
-            } catch (e) { alert("Connection failed. Ensure Hardhat node is running."); }
+                await refreshData();
+                logStatus("Securely Connected");
+            } catch (e) {
+                logStatus("Connection Denied");
+            }
         }
+
+        window.handleAction = async (type) => {
+            if (!contract) return alert("Connect wallet");
+            const val = document.getElementById('amtInput').value;
+            if (!val || val <= 0) return alert("Enter valid amount");
+
+            try {
+                logStatus(`Pending ${type}...`);
+                const wei = ethers.parseEther(val);
+                const tx = (type === 'deposit') 
+                    ? await contract.deposit({ value: wei }) 
+                    : await contract.withdraw(wei);
+                
+                await tx.wait();
+                logStatus(`${type} Successful`);
+                await refreshData();
+            } catch (e) {
+                logStatus("Transaction Failed");
+                alert(e.reason || "Check balance and gas");
+            }
+        };
+
+        window.handleTransfer = async () => {
+            if (!contract) return alert("Connect wallet");
+            const to = document.getElementById('targetAddr').value;
+            const amt = document.getElementById('transferAmt').value;
+            
+            if (!ethers.isAddress(to)) return alert("Invalid Address");
+            if (!amt || amt <= 0) return alert("Invalid Amount");
+
+            try {
+                logStatus("Processing Transfer...");
+                const tx = await contract.transfer(to, ethers.parseEther(amt));
+                await tx.wait();
+                logStatus("Transfer Complete");
+                await refreshData();
+            } catch (e) {
+                logStatus("Transfer Failed");
+                alert(e.reason || "Transaction Error");
+            }
+        };
 
         async function refreshData() {
             const address = await signer.getAddress();
             document.getElementById('userAddressDisplay').innerText = `${address.substring(0,6)}...${address.substring(38)}`;
 
-            // FETCH DATA PARALLEL
             const [walletWei, bankWei, stats, ownerAddr] = await Promise.all([
                 provider.getBalance(address),
                 contract.getBalance(address),
@@ -133,45 +166,199 @@
                 contract.owner()
             ]);
 
-            document.getElementById('walletBal').innerText = parseFloat(ethers.formatEther(walletWei)).toFixed(2);
+            document.getElementById('walletBal').innerText = parseFloat(ethers.formatEther(walletWei)).toFixed(4);
             document.getElementById('bankBal').innerText = parseFloat(ethers.formatEther(bankWei)).toFixed(4);
-            document.getElementById('treasuryBal').innerText = parseFloat(ethers.formatEther(stats.bankProfit)).toFixed(6);
+            document.getElementById('treasuryBal').innerText = parseFloat(ethers.formatEther(stats[1])).toFixed(6);
 
-            // ADMIN LOGIC
-            if(address.toLowerCase() === ownerAddr.toLowerCase()) {
-                const claimBtn = document.getElementById('withdrawFeesBtn');
-                claimBtn.classList.remove('hidden');
-                claimBtn.onclick = async () => {
-                    const tx = await contract.withdrawFees();
-                    await tx.wait();
+            if (address.toLowerCase() === ownerAddr.toLowerCase()) {
+                const btn = document.getElementById('withdrawFeesBtn');
+                btn.classList.remove('hidden');
+                btn.onclick = async () => {
+                    await (await contract.withdrawFees()).wait();
                     refreshData();
                 };
             }
         }
 
-        window.handleAction = async (type) => {
-            const val = document.getElementById('amtInput').value;
-            if(!val) return alert("Enter an amount");
-            try {
-                const tx = (type === 'deposit') 
-                    ? await contract.deposit({ value: ethers.parseEther(val) }) 
-                    : await contract.withdraw(ethers.parseEther(val));
-                await tx.wait();
-                refreshData();
-            } catch (e) { alert("Transaction Failed! Check MetaMask Settings > Advanced > Clear activity/Reset Account."); }
-        };
+        function logStatus(msg) {
+            document.getElementById('statusLog').innerText = msg;
+        }
 
-        window.handleTransfer = async () => {
-            const to = document.getElementById('targetAddr').value;
-            if(!to) return alert("Enter recipient address");
-            try {
-                const tx = await signer.sendTransaction({ to, value: ethers.parseEther("1.0") });
-                await tx.wait();
-                refreshData();
-            } catch (e) { alert("Transfer Failed"); }
-        };
+        async function switchAccount() {
+            await window.ethereum.request({ method: "wallet_requestPermissions", params: [{ eth_accounts: {} }] });
+        }
 
         init();
     </script>
 </body>
+</html> -->
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartBank Pro | DeFi Vault</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 p-4 md:p-12 min-h-screen text-slate-900">
+    <div class="max-w-4xl mx-auto space-y-8">
+
+        <header
+            class="flex flex-col md:flex-row justify-between items-center gap-6 bg-white/50 p-6 rounded-3xl border border-white shadow-sm glass-card">
+            <div class="flex items-center gap-4">
+                <div class="bg-blue-600 p-3 rounded-2xl shadow-lg shadow-blue-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black text-slate-800 tracking-tight">SmartBank <span
+                            class="text-blue-600">Pro</span></h1>
+                    <div id="accountDisplay" class="flex items-center gap-2 mt-1">
+                        <span id="statusIndicator"
+                            class="w-2 h-2 bg-slate-300 rounded-full transition-colors duration-500"></span>
+                        <span id="userAddressDisplay"
+                            class="text-[10px] mono text-slate-500 font-bold uppercase tracking-tighter">Disconnected</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button id="switchBtn"
+                    class="hidden bg-white text-slate-600 px-5 py-2.5 rounded-2xl font-bold border border-slate-200 hover:border-blue-300 hover:text-blue-600 transition-all shadow-sm text-sm">
+                    Switch Account
+                </button>
+                <button id="connectBtn"
+                    class="bg-slate-900 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-600 shadow-xl shadow-slate-200 transition-all text-sm">
+                    Connect Wallet
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div
+                class="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 rounded-[2rem] text-white shadow-2xl shadow-blue-200">
+                <p class="text-blue-100 text-[10px] font-black uppercase tracking-[0.2em]">In Wallet</p>
+                <h2 class="text-4xl font-black mt-3 flex items-baseline gap-2">
+                    <span id="walletBal">0.00</span>
+                    <span class="text-lg font-medium opacity-50">ETH</span>
+                </h2>
+            </div>
+
+            <div class="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm">
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Bank Deposit</p>
+                <h2 class="text-4xl font-black mt-3 text-slate-800 flex items-baseline gap-2">
+                    <span id="bankBal">0.00</span>
+                    <span class="text-lg font-medium text-slate-300">ETH</span>
+                </h2>
+            </div>
+
+            <div class="bg-slate-900 p-8 rounded-[2rem] text-white shadow-2xl">
+                <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Lifetime Interest</p>
+                <h2 class="text-4xl font-black mt-3 flex items-baseline gap-2">
+                    <span id="interestEarned">0.00</span>
+                    <span class="text-lg font-medium opacity-30">ETH</span>
+                </h2>
+                <p class="text-slate-500 text-[10px] mt-2 font-bold">Last Paid: <span id="lastInterestTime">Never</span>
+                </p>
+
+                <div class="border-t border-slate-700 my-4"></div>
+
+                <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Treasury Profit</p>
+                <h2 class="text-2xl font-black mt-1 flex items-baseline gap-2">
+                    <span id="treasuryBal">0.00</span>
+                    <span class="text-sm font-medium opacity-30">ETH</span>
+                </h2>
+                <button id="withdrawFeesBtn"
+                    class="hidden mt-4 w-full bg-white/10 hover:bg-white text-white hover:text-slate-900 py-2 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest border border-white/10">
+                    Claim Protocol Fees
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-1.5 h-6 bg-blue-600 rounded-full"></div>
+                <h3 class="text-xl font-extrabold text-slate-800">Vault Operations</h3>
+            </div>
+            <div class="max-w-xl mx-auto space-y-8">
+                <div class="relative">
+                    <label
+                        class="block text-center text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Amount
+                        to process</label>
+                    <input type="number" id="amtInput" placeholder="0.00" step="0.1"
+                        class="w-full p-8 bg-slate-50 border-2 border-slate-100 rounded-[2rem] outline-none focus:border-blue-500 focus:bg-white transition-all font-black text-5xl text-center placeholder:text-slate-200">
+                    <span class="absolute right-8 bottom-8 font-bold text-slate-300 text-xl">ETH</span>
+                </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <button id="depositBtn"
+                        class="flex-1 bg-green-500 hover:bg-green-600 text-white py-6 rounded-3xl font-black text-xl shadow-xl shadow-green-100 active:scale-95 transition-all">
+                        DEPOSIT TO BANK
+                    </button>
+                    <button id="withdrawBtn"
+                        class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-6 rounded-3xl font-black text-xl active:scale-95 transition-all">
+                        WITHDRAW TO WALLET
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-1.5 h-6 bg-purple-600 rounded-full"></div>
+                <h3 class="text-xl font-extrabold text-slate-800">Transaction History</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr
+                            class="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">
+                            <th class="pb-4 pl-4">Type</th>
+                            <th class="pb-4">Amount (ETH)</th>
+                            <th class="pb-4">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTable" class="text-sm font-bold text-slate-700">
+                        <tr>
+                            <td colspan="3" class="p-4 text-center text-slate-400">No transactions yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer id="statusLog"
+            class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] pb-10">
+            Secure Encryption Active • System Ready
+        </footer>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+
 </html>

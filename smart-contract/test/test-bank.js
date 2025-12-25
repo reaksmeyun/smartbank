@@ -1,53 +1,123 @@
 
-const { ethers } = require("hardhat");
+// const { ethers } = require("hardhat");
 
-async function main() {
-  const [owner] = await ethers.getSigners();
-  const proxyAddress = "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512";
-  const bank = await ethers.getContractAt("SmartBank", proxyAddress);
+// async function main() {
+//   const [owner] = await ethers.getSigners();
+//   const proxyAddress = "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512";
+//   const bank = await ethers.getContractAt("SmartBank", proxyAddress);
 
-  // 1. Fetch data from Blockchain
-  const balance = await bank.getBalance(owner.address);
-  const history = await bank.getHistory(owner.address);
-  const stats = await bank.getBankStatistics();
+//   // 1. Fetch data from Blockchain
+//   const balance = await bank.getBalance(owner.address);
+//   const history = await bank.getHistory(owner.address);
+//   const stats = await bank.getBankStatistics();
 
-  // 2. Format the Output
-  console.log("\n" + "=".repeat(60));
-  console.log("                SMARTBANK CUSTOMER REPORT                ");
-  console.log("=".repeat(60));
-  console.log(`ACCOUNT HOLDER:  ${owner.address}`);
-  console.log(`CURRENT BALANCE: ${ethers.formatEther(balance)} ETH`);
-  console.log(`BANK LIQUIDITY:  ${ethers.formatEther(stats.totalLiquidity)} ETH`);
-  console.log("-".repeat(60));
-  console.log("                TRANSACTION HISTORY                      ");
-  console.log("-".repeat(60));
+//   // 2. Format the Output
+//   console.log("\n" + "=".repeat(60));
+//   console.log("                SMARTBANK CUSTOMER REPORT                ");
+//   console.log("=".repeat(60));
+//   console.log(`ACCOUNT HOLDER:  ${owner.address}`);
+//   console.log(`CURRENT BALANCE: ${ethers.formatEther(balance)} ETH`);
+//   console.log(`BANK LIQUIDITY:  ${ethers.formatEther(stats.totalLiquidity)} ETH`);
+//   console.log("-".repeat(60));
+//   console.log("                TRANSACTION HISTORY                      ");
+//   console.log("-".repeat(60));
 
-  if (history.length === 0) {
-    console.log("   No transactions recorded yet.");
-  } else {
-    // Transform the raw blockchain data into a readable format
-    const cleanHistory = history.map((tx, index) => ({
-      "ID": index + 1,
-      "Activity": tx.txType,
-      "Value (ETH)": ethers.formatEther(tx.amount),
-      "Date/Time": new Date(Number(tx.timestamp) * 1000).toLocaleString()
-    }));
+//   if (history.length === 0) {
+//     console.log("   No transactions recorded yet.");
+//   } else {
+//     // Transform the raw blockchain data into a readable format
+//     const cleanHistory = history.map((tx, index) => ({
+//       "ID": index + 1,
+//       "Activity": tx.txType,
+//       "Value (ETH)": ethers.formatEther(tx.amount),
+//       "Date/Time": new Date(Number(tx.timestamp) * 1000).toLocaleString()
+//     }));
 
-    // This command generates the clean grid/table
-    console.table(cleanHistory);
-  }
+//     // This command generates the clean grid/table
+//     console.table(cleanHistory);
+//   }
 
-  console.log("=".repeat(60));
-  console.log("             * Interest is auto-compounded * ");
-  console.log("=".repeat(60) + "\n");
-}
+//   console.log("=".repeat(60));
+//   console.log("             * Interest is auto-compounded * ");
+//   console.log("=".repeat(60) + "\n");
+// }
 
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error("Critical Error:", error);
-    process.exit(1);
+// main()
+//   .then(() => process.exit(0))
+//   .catch((error) => {
+//     console.error("Critical Error:", error);
+//     process.exit(1);
+//   });
+
+
+
+
+
+
+
+
+
+// TEST SMARTCONTRACT LOGIC
+const { expect } = require("chai");
+const { ethers, upgrades } = require("hardhat");
+// ADD THIS LINE BELOW:
+const { time } = require("@nomicfoundation/hardhat-network-helpers"); 
+
+describe("SmartBank Pro - Comprehensive Test Suite", function () {
+  // 1. DECLARE THE VARIABLE HERE (Top Level)
+  let SmartBank, smartBank, owner, user1, user2;
+
+  beforeEach(async function () {
+    [owner, user1, user2] = await ethers.getSigners();
+    SmartBank = await ethers.getContractFactory("SmartBank");
+    
+    // 2. ASSIGN THE VALUE HERE
+    smartBank = await upgrades.deployProxy(SmartBank, [], {
+      initializer: "initialize",
+      kind: "uups",
+    });
+    await smartBank.waitForDeployment();
   });
+
+  // 3. YOUR TEST CASE MUST BE INSIDE THIS "describe" BLOCK
+  it("Should resolve withdrawal error after funding the bank", async function () {
+      const depositAmt = ethers.parseEther("10.0");
+      await smartBank.connect(user1).deposit({ value: depositAmt });
+
+      // Simulate 1 year of interest (approx 5% of 10 ETH = 0.5 ETH)
+      await time.increase(31536000); 
+
+      // Force interest calculation
+      await smartBank.connect(user1).deposit({ value: ethers.parseEther("0.001") });
+
+      const userBalance = await smartBank.getBalance(user1.address);
+      
+      // Should fail first because contract balance < userBalance (due to interest)
+      await expect(
+        smartBank.connect(user1).withdraw(userBalance)
+      ).to.be.revertedWith("Bank Liquidity Error: Contact Admin");
+
+      // Fund the bank to cover interest
+      const fundingAmt = ethers.parseEther("1.0");
+      await smartBank.fundBank({ value: fundingAmt });
+
+      // Now withdrawal should succeed
+      await expect(smartBank.connect(user1).withdraw(userBalance)).to.not.be.reverted;
+      
+      const remainingBalance = await smartBank.getBalance(user1.address);
+      expect(remainingBalance).to.equal(0);
+  });
+});
+
+
+
+
+
+
+
+
+
+
 
 
 
